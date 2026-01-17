@@ -3,23 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TU SANTO PATRONO DE ESTE AÑO 2026 ES: </title>
+    <title>TU SANTO PATRONO </title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
 </head>
 <body>
     <div class="container">
-        <h1>TU SANTO PATRONO ES:</h1>
-        <div id="image-container">
-            <img id="random-image" src="" alt="Imagen aleatoria">
+        <h1>✨ TU SANTO PATRÓN 2026 ES: ✨</h1>
+        <p class="subtitle">Descubre quién te acompañará este año</p>
+        
+        <!-- Contenedor de la tarjeta animada -->
+        <div class="card-container">
+            <div class="card" id="card">
+                <!-- Cara frontal (reverso de la tarjeta) -->
+                <div class="card-face card-front">
+                    <div class="mystery-content">
+                        <div class="question-mark">?</div>
+                        <div class="mystery-text">¿Quién será?</div>
+                    </div>
+                    <div class="particles" id="particles"></div>
+                </div>
+                <!-- Cara trasera (imagen revelada) -->
+                <div class="card-face card-back">
+                    <img id="random-image" src="" alt="Tu santo patrón" loading="lazy">
+                    <div class="image-title" id="image-title"></div>
+                </div>
+            </div>
         </div>
+        
+        <!-- Controles -->
         <div class="controls">
-            <button id="random-btn">🎲 Nueva imagen aleatoria</button>
-            <button id="open-original">🔗 Ver original en Imgur</button>
+            <button id="reveal-btn">
+                <span class="btn-icon">🎴</span>
+                <span class="btn-text">REVELAR SANTO</span>
+            </button>
+            <button id="open-original">
+                <span class="btn-icon">⛪</span>
+                <span class="btn-text">Ver detalles</span>
+            </button>
         </div>
+        
+        <!-- Información y estadísticas -->
         <div class="info">
-            <p id="counter">Cargando...</p>
-            <p class="tip">Actualiza la página o presiona el botón para ver otra imagen</p>
+            <div id="counter" class="counter">Prepara tu revelación...</div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-icon">📊</span>
+                    <span class="stat-text">Total de santos: <span id="total-count">0</span></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">🎲</span>
+                    <span class="stat-text">Revelado: <span id="revealed-count">0</span></span>
+                </div>
+            </div>
+            <div class="tip">
+                <span class="tip-icon">💡</span>
+                <span class="tip-text">Presiona ESPACIO para revelar otro santo</span>
+            </div>
+        </div>
+        
+        <!-- Firma -->
+        <div class="signature">
+            <p>✨ Por un 2026 lleno de Papá Dios ✨</p>
         </div>
     </div>
     
