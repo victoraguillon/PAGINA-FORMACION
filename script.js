@@ -1,4 +1,4 @@
-// Lista completa de santos con sus IDs y nombres
+// Lista de santos con IDs y nombres
 const santos = [
     { id: 'gHixzQm', nombre: 'Santa Faustina Kowalska' },
     { id: 'Pc9Fq2A', nombre: 'Santa Teresita de Lisieux' },
@@ -9,115 +9,131 @@ const santos = [
     { id: 'ne53Psr', nombre: 'San Agustín de Hipona' }
 ];
 
-let santoActual = null;
-let revelando = false;
-
-// Elementos del DOM
-const card = document.getElementById('card');
-const santoImage = document.getElementById('santo-image');
-const santoName = document.getElementById('santo-name');
-const revelarBtn = document.getElementById('revelar-btn');
-
-// Función para obtener un santo aleatorio
-function obtenerSantoAleatorio() {
-    return santos[Math.floor(Math.random() * santos.length)];
+// Verificar si ya se reveló un santo (usando localStorage)
+function yaSeRevelo() {
+    return localStorage.getItem('santoRevelado') === 'true';
 }
 
-// Función principal para revelar
-function revelarSanto() {
-    if (revelando) return;
+// Guardar que se reveló un santo
+function guardarRevelacion(santoIndex) {
+    localStorage.setItem('santoRevelado', 'true');
+    localStorage.setItem('santoIndex', santoIndex.toString());
+    localStorage.setItem('santoNombre', santos[santoIndex].nombre);
+    localStorage.setItem('santoId', santos[santoIndex].id);
+}
+
+// Limpiar revelación (para reiniciar)
+function limpiarRevelacion() {
+    localStorage.removeItem('santoRevelado');
+    localStorage.removeItem('santoIndex');
+    localStorage.removeItem('santoNombre');
+    localStorage.removeItem('santoId');
+}
+
+// Obtener un santo aleatorio que no se haya mostrado recientemente
+function obtenerSantoAleatorio() {
+    // Obtener último santo mostrado
+    const ultimoSantoIndex = parseInt(localStorage.getItem('santoIndex') || '-1');
     
-    revelando = true;
-    revelarBtn.disabled = true;
-    revelarBtn.textContent = 'REVELANDO...';
+    // Si no hay último santo o solo hay uno, elegir aleatorio
+    if (ultimoSantoIndex === -1 || santos.length === 1) {
+        return Math.floor(Math.random() * santos.length);
+    }
     
-    // Obtener nuevo santo (asegurarse que no sea el mismo)
-    let nuevoSanto;
+    // Intentar obtener un santo diferente al último
+    let nuevoIndex;
     do {
-        nuevoSanto = obtenerSantoAleatorio();
-    } while (santoActual && nuevoSanto.id === santoActual.id);
+        nuevoIndex = Math.floor(Math.random() * santos.length);
+    } while (nuevoIndex === ultimoSantoIndex && santos.length > 1);
     
-    santoActual = nuevoSanto;
+    return nuevoIndex;
+}
+
+// Mostrar la pantalla inicial (¿QUIÉN SERÁ?)
+function mostrarPantallaInicial() {
+    const contenido = document.getElementById('contenido');
     
-    // Precargar imagen
-    const imgUrl = `https://i.imgur.com/${santoActual.id}.jpg`;
-    const imagen = new Image();
+    contenido.innerHTML = `
+        <div class="quien-sera">¿QUIÉN SERÁ?</div>
+        <button class="boton-revelar" id="revelarBtn">REVELAR MI SANTO</button>
+        <p class="mensaje-inicial">Haz clic en el botón para descubrir quién te acompañará este año</p>
+    `;
     
-    imagen.onload = function() {
-        // Una vez cargada la imagen, proceder con la animación
+    // Agregar evento al botón
+    document.getElementById('revelarBtn').addEventListener('click', function() {
+        // Deshabilitar botón para evitar múltiples clics
+        this.disabled = true;
+        this.textContent = 'REVELANDO...';
+        
+        // Obtener santo aleatorio
+        const santoIndex = obtenerSantoAleatorio();
+        
+        // Guardar en localStorage
+        guardarRevelacion(santoIndex);
+        
+        // Recargar la página después de un breve delay para que se vea el cambio de texto
         setTimeout(() => {
-            // Cambiar imagen y nombre
-            santoImage.src = imgUrl;
-            santoImage.alt = santoActual.nombre;
-            santoName.textContent = santoActual.nombre;
-            
-            // Revelar la tarjeta
-            card.classList.add('revelado');
-            
-            // Restablecer botón
-            setTimeout(() => {
-                revelarBtn.disabled = false;
-                revelarBtn.textContent = 'REVELAR OTRO SANTO';
-                revelando = false;
-            }, 500);
-            
-        }, 300);
-    };
+            window.location.reload();
+        }, 500);
+    });
+}
+
+// Mostrar el santo revelado
+function mostrarSantoRevelado() {
+    const santoNombre = localStorage.getItem('santoNombre');
+    const santoId = localStorage.getItem('santoId');
     
-    imagen.onerror = function() {
-        // En caso de error, mostrar mensaje
-        santoName.textContent = 'Error al cargar la imagen';
-        card.classList.add('revelado');
+    if (!santoNombre || !santoId) {
+        // Si no hay datos, mostrar pantalla inicial
+        limpiarRevelacion();
+        mostrarPantallaInicial();
+        return;
+    }
+    
+    const contenido = document.getElementById('contenido');
+    
+    contenido.innerHTML = `
+        <div class="santo-revelado">
+            <img class="santo-imagen" src="https://i.imgur.com/${santoId}.jpg" alt="${santoNombre}">
+            <div class="santo-nombre">${santoNombre}</div>
+            <button class="boton-otro" id="otroSantoBtn">REVELAR OTRO SANTO</button>
+            <p class="mensaje-inicial">Tu santo patrón para este año 2026</p>
+        </div>
+    `;
+    
+    // Agregar evento al botón "Revelar otro santo"
+    document.getElementById('otroSantoBtn').addEventListener('click', function() {
+        this.disabled = true;
+        this.textContent = 'CARGANDO...';
+        
+        // Limpiar localStorage y recargar
+        limpiarRevelacion();
         
         setTimeout(() => {
-            revelarBtn.disabled = false;
-            revelarBtn.textContent = 'INTENTAR DE NUEVO';
-            revelando = false;
+            window.location.reload();
         }, 500);
-    };
-    
-    imagen.src = imgUrl;
+    });
 }
 
-// Función para reiniciar (ocultar tarjeta)
-function reiniciarTarjeta() {
-    card.classList.remove('revelado');
-}
-
-// Evento para el botón revelar
-revelarBtn.addEventListener('click', function() {
-    if (card.classList.contains('revelado')) {
-        // Si ya está revelado, reiniciar primero
-        reiniciarTarjeta();
-        setTimeout(revelarSanto, 500);
-    } else {
-        // Si no está revelado, revelar directamente
-        revelarSanto();
-    }
-});
-
-// Atajo de teclado (Espacio)
-document.addEventListener('keydown', function(e) {
-    if (e.code === 'Space' && !revelando) {
-        e.preventDefault();
-        if (card.classList.contains('revelado')) {
-            reiniciarTarjeta();
-            setTimeout(revelarSanto, 500);
-        } else {
-            revelarSanto();
-        }
-    }
-});
-
-// Cargar un santo aleatorio al iniciar (pero sin mostrar)
-window.addEventListener('DOMContentLoaded', function() {
-    // Precargar todas las imágenes para mejor experiencia
+// Cargar la página adecuada cuando se carga el DOM
+document.addEventListener('DOMContentLoaded', function() {
+    // Precargar imágenes para mejor experiencia
     santos.forEach(santo => {
         const img = new Image();
         img.src = `https://i.imgur.com/${santo.id}.jpg`;
     });
     
-    // Mostrar instrucción inicial
-    console.log('✨ Santo Patrón 2026 cargado ✨');
-    console.log('Presiona el botón o la tecla ESPACIO para revelar');
+    // Verificar si ya se reveló un santo
+    if (yaSeRevelo()) {
+        mostrarSantoRevelado();
+    } else {
+        mostrarPantallaInicial();
+    }
+    
+    // También permitir recargar con tecla F5 o Ctrl+R
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+            limpiarRevelacion();
+        }
+    });
 });
